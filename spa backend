@@ -1,0 +1,116 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.2"
+  }
+}
+ Step 3: backend/server.js
+js
+Copy code
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import noteRoutes from "./routes/noteRoutes.js";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+
+
+// Routes
+app.use("/api/notes", noteRoutes);
+
+// Server
+const PORT = 5000;
+app.listen(PORT, () => console.log(Server running on port ${PORT}));
+Step 4: backend/models/Note.js
+js
+Copy code
+import mongoose from "mongoose";
+
+const noteSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+});
+
+export default mongoose.model("Note", noteSchema);
+  Step 5: backend/routes/noteRoutes.js
+js
+Copy code
+import express from "express";
+import Note from "../models/Note.js";
+
+const router = express.Router();
+
+// 📜 Get all notes
+router.get("/", async (req, res) => {
+  try {
+    const notes = await Note.find();
+    res.json(notes);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ✍ Add a new note
+router.post("/", async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const newNote = new Note({ title, content });
+    await newNote.save();
+    res.json({ message: "Note added successfully!" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+export default router;
+🧾 Step 6: .gitignore (in backend)
+gitignore
+Copy code
+node_modules
+.env
+🧪 Step 7: Run the backend
+Start MongoDB locally (or connect to MongoDB Atlas), then run:
+
+bash
+Copy code
+node server.js
+You’ll see:
+
+arduino
+Copy code
+✅ MongoDB connected
+🚀 Server running on port 5000
+🌐 API Endpoints
+Method	Endpoint	Description
+GET	/api/notes	Get all notes
+POST	/api/notes	Add a new note
+
+Example request:
+
+bash
+Copy code
+POST http://localhost:5000/api/notes
+Content-Type: application/json
+
+{
+  "title": "My first note",
+  "content": "This is a backend API test!"
+}
+🔗 To connect with your React frontend
+In your React code (e.g., Home.js or AddNote.js), use:
+
+js
+Copy code
+axios.get("http://localhost:5000/api/notes");
+axios.post("http://localhost:5000/api/notes", { title, content });
